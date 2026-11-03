@@ -11,3 +11,5 @@ Images are built for linux/amd64. Deploy the immutable `sha-<full commit SHA>` t
 Set Helm frontend.image.repository to ghcr.io/scroll-tech/blockscout-frontend and frontend.image.tag to the selected tag after the workflow succeeds. If GHCR creates a private package, configure imagePullSecrets for EKS or make the package public. Keep NEXT_PUBLIC_API_HOST=blockscout-backend.scroll.systems and NEXT_PUBLIC_APP_HOST=blockscout.scroll.systems.
 
 Run the focused credential tests with Node 24: `node --test tests/scroll-access.test.mjs`.
+
+BuildKit cache is stored in the same GHCR package under `buildcache-linux-amd64`, using the existing registry login. This avoids relying on GitHub Actions cache write scopes for closed pull request events. The cache tag is not a deployable application image.
