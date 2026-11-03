@@ -7,14 +7,6 @@ import { CSP_NONCE_HEADER } from 'src/server/constants';
 import * as csp from 'src/server/csp/index';
 import * as middlewares from 'src/server/middlewares/index';
 
-import appConfig from 'src/config';
-
-const adsBannerFeature = appConfig.features.adsBanner;
-const adsTextFeature = appConfig.features.adsText;
-const shouldUseCspNonce =
-  (adsBannerFeature.isEnabled && adsBannerFeature.provider === 'sevio') ||
-  (adsTextFeature.isEnabled && adsTextFeature.provider === 'sevio');
-
 export async function proxy(req: NextRequest) {
   const isPageRequest = req.headers.get('accept')?.includes('text/html');
   const start = Date.now();
@@ -38,7 +30,7 @@ export async function proxy(req: NextRequest) {
 
   const end = Date.now();
 
-  const nonce = shouldUseCspNonce ? crypto.randomUUID().replaceAll('-', '') : undefined;
+  const nonce = crypto.randomUUID().replaceAll('-', '');
   const cspHeader = await csp.get(req, nonce);
 
   res.headers.append('Content-Security-Policy', cspHeader);
