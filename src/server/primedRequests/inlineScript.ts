@@ -68,7 +68,9 @@ var value=getCookie(descriptor[1]);
 if(descriptor[2]==='flag'){if(value==='true'){headers[descriptor[0]]='true'}}
 else if(value){headers[descriptor[0]]=value}
 });
-var promise=fetch(url,{headers:headers});
+// Match the normal fetch policy so early requests also carry Access cookies.
+var credentials=new URL(url,location.href).origin==='https://blockscout-backend.scroll.systems'?'include':'same-origin';
+var promise=fetch(url,{headers:headers,credentials:credentials});
 promise.catch(function(){});
 return[url,{promise:promise,headers:headers}]
 });
