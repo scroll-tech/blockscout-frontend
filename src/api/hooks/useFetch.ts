@@ -7,6 +7,7 @@ import { useRollbar } from 'src/services/rollbar';
 import type { ResourceError, ResourcePath } from '../resources';
 import isBodyAllowed from '../utils/is-body-allowed';
 import takePrimedFetch from '../utils/primed-fetch';
+import getScrollFetchCredentials from '../utils/scroll-fetch-credentials';
 
 export interface Params {
   method?: RequestInit['method'];
@@ -43,6 +44,7 @@ export default function useFetch() {
 
     const reqParams = {
       ...params,
+      credentials: getScrollFetchCredentials(path) === 'include' ? 'include' as const : params?.credentials,
       body,
       headers: {
         ...(withBody && !isFormData ? { 'Content-type': 'application/json' } : undefined),
