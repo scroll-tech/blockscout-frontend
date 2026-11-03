@@ -5,7 +5,9 @@ import type { DocumentContext } from 'next/document';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import React from 'react';
 
+import { CSP_NONCE_HEADER } from 'src/server/constants';
 import { getPrimerScript } from 'src/server/primedRequests';
+import getDocumentCspNonce from 'src/server/utils/getDocumentCspNonce';
 import logRequestFromBot from 'src/server/utils/logRequestFromBot';
 import * as serverTiming from 'src/server/utils/serverTiming';
 
@@ -17,7 +19,7 @@ import { ColorModeProvider } from 'src/toolkit/chakra/color-mode';
 const marketplaceFeature = config.features.marketplace;
 const usercentrics = config.services.usercentrics;
 
-class MyDocument extends Document {
+class MyDocument extends Document<{ cspNonce?: string }> {
   static async getInitialProps(ctx: DocumentContext) {
     const originalRenderPage = ctx.renderPage;
     ctx.renderPage = async() => {
@@ -34,7 +36,10 @@ class MyDocument extends Document {
 
     const initialProps = await Document.getInitialProps(ctx);
 
-    return initialProps;
+    return {
+      ...initialProps,
+      cspNonce: getDocumentCspNonce(ctx.res?.getHeader(CSP_NONCE_HEADER)),
+    };
   }
 
   render() {
@@ -46,10 +51,10 @@ class MyDocument extends Document {
           { /* Color mode script: without children the provider renders only its inline script, which sets the theme */ }
           { /* class on <html> before the first paint. The copy rendered by the app provider sits after the global styles */ }
           { /* in <body>, and Firefox paints the page white before reaching it. */ }
-          <ColorModeProvider/>
+          <ColorModeProvider nonce={ this.props.cspNonce }/>
 
           { /* Early-fetch primer: fire the page's first-render API requests before the JS bundle boots */ }
-          { primerScript && <script dangerouslySetInnerHTML={{ __html: primerScript }}/> }
+          { primerScript && <script nonce={ this.props.cspNonce } dangerouslySetInnerHTML={{ __html: primerScript }}/> }
 
           { /* Warm the SVG sprite request during HTML parse; SpriteInjector's fetch reuses this */ }
           { /* preload (as="fetch" + crossOrigin match the fetch destination/credentials mode). */ }
@@ -106,7 +111,7 @@ class MyDocument extends Document {
         </Head>
         <body>
           <Main/>
-          <NextScript/>
+          <NextScript nonce={ this.props.cspNonce }/>
         </body>
       </Html>
     );

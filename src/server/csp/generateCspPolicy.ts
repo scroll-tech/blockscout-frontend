@@ -7,6 +7,8 @@ function generateCspPolicy(isPrivateMode = false, nonce?: string, primerScriptHa
   const policyDescriptor = mergeDescriptors(
     descriptors.addressProfileApi(),
     descriptors.app(isPrivateMode, primerScriptHashes),
+    // Authorize only scripts carrying this response's random nonce.
+    { 'script-src': nonce ? [ `'nonce-${ nonce }'` ] : [] },
     descriptors.ads(isPrivateMode, nonce),
     descriptors.connectWallet(isPrivateMode),
     descriptors.cloudFlare(isPrivateMode),
