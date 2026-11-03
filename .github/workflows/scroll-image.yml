@@ -72,5 +72,7 @@ jobs:
           build-args: |
             GIT_COMMIT_SHA=${{ github.sha }}
             GIT_TAG=${{ github.ref_type == 'tag' && github.ref_name || '' }}
-          cache-from: type=gha,scope=scroll-frontend-amd64
-          cache-to: type=gha,mode=max,scope=scroll-frontend-amd64
+          # Closed PR events can have a read-only Actions cache token. Use the
+          # registry credentials already used to publish the image instead.
+          cache-from: type=registry,ref=${{ steps.image.outputs.name }}:buildcache-linux-amd64
+          cache-to: type=registry,ref=${{ steps.image.outputs.name }}:buildcache-linux-amd64,mode=max,image-manifest=true,oci-mediatypes=true
