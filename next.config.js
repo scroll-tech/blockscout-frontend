@@ -37,7 +37,7 @@ const moduleExports = {
     },
   },
   // Used when BUNDLE_ANALYZER=true (run: next build --webpack) or for custom webpack tooling
-  webpack(config) {
+  webpack(config, { isServer, webpack }) {
     config.module.rules.push(
       {
         test: /\.svg$/,
@@ -54,6 +54,14 @@ const moduleExports = {
       // warn about it on every production build.
       '@react-native-async-storage/async-storage': false,
     };
+    if (!isServer) {
+      // Helia's browser graph re-exports a socket adapter importing node:stream.
+      // Resolve this URI to a real browser stream implementation, not an empty stub.
+      config.plugins.push(new webpack.NormalModuleReplacementPlugin(
+        /^node:stream$/,
+        require.resolve('readable-stream/lib/ours/browser.js'),
+      ));
+    }
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
     
     config.experiments = { ...config.experiments, topLevelAwait: true };
