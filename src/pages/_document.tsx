@@ -38,7 +38,7 @@ class MyDocument extends Document<{ cspNonce?: string }> {
 
     return {
       ...initialProps,
-      cspNonce: getDocumentCspNonce(ctx.res?.getHeader(CSP_NONCE_HEADER)),
+      cspNonce: getDocumentCspNonce(ctx.req?.headers[CSP_NONCE_HEADER]) ?? getDocumentCspNonce(ctx.res?.getHeader(CSP_NONCE_HEADER)),
     };
   }
 
