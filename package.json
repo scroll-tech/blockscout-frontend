@@ -15,7 +15,7 @@
     "profile:analyze": "./tools/profiling/run.sh",
     "presets:sync": "./tools/dev-server/sync-presets/run.sh --write",
     "presets:lint": "./tools/dev-server/sync-presets/run.sh",
-    "build": "pnpm lint:tsc && next build",
+    "build": "pnpm lint:tsc && next build --webpack",
     "build:next": "./deploy/scripts/download_assets.sh ./public/assets/configs && pnpm svg:build-sprite && ./deploy/scripts/make_envs_script.sh && pnpm build",
     "build:docker": "./tools/dev-server/docker.build.sh",
     "build:analyze": "pnpm lint:tsc && BUNDLE_ANALYZER=true next build --webpack",

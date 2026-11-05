@@ -20,7 +20,13 @@ export async function proxy(req: NextRequest) {
     return accountResponse;
   }
 
-  const res = NextResponse.next();
+  const nonce = crypto.randomUUID().replaceAll('-', '');
+  const cspHeader = await csp.get(req, nonce);
+  // Next.js reads CSP from the incoming request while rendering its scripts.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('Content-Security-Policy', cspHeader);
+  requestHeaders.set(CSP_NONCE_HEADER, nonce);
+  const res = NextResponse.next({ request: { headers: requestHeaders } });
 
   middlewares.appProfile(req, res);
   middlewares.colorTheme(req, res);
@@ -29,9 +35,6 @@ export async function proxy(req: NextRequest) {
   middlewares.poorReputationTokens(req, res);
 
   const end = Date.now();
-
-  const nonce = crypto.randomUUID().replaceAll('-', '');
-  const cspHeader = await csp.get(req, nonce);
 
   res.headers.append('Content-Security-Policy', cspHeader);
   res.headers.append('Server-Timing', `middleware;dur=${ end - start }`);
